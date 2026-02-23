@@ -8,9 +8,9 @@ Phase transition universality analysis for the SFC-ABM model of AI-driven labor 
 |---|----------|------|------|
 | 1 | Phase Diagram | BDP(21) × σ_mult(10) × regime(2) × 30 seeds | 12,600 |
 | 2 | Topology Universality | BDP(11) × topology(4) × regime(2) × 30 seeds | 2,640 |
-| 3 | Finite-Size Scaling | BDP(11) × N(4) × 30 seeds | 1,320 |
+| 3 | Finite-Size Scaling | BDP(11) × N(5) × 30 seeds | 1,650 |
 | 4 | Decision Rule Sensitivity | BDP(11) × variant(5) × 30 seeds | 1,650 |
-| | **Total** | | **18,210** |
+| | **Total** | | **18,540** |
 
 ## Prerequisites
 

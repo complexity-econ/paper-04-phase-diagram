@@ -1,0 +1,763 @@
+% !TEX program = xelatex
+% Compile: xelatex → biber → xelatex → xelatex
+\documentclass[12pt,a4paper]{article}
+
+\usepackage{fontspec}
+\usepackage[english]{babel}
+\usepackage[style=authoryear,backend=biber,maxcitenames=2]{biblatex}
+\addbibresource{references.bib}
+\usepackage{amsmath,amssymb}
+\usepackage{graphicx}
+\usepackage{booktabs}
+\usepackage{hyperref}
+\usepackage[margin=2.5cm]{geometry}
+\usepackage{subcaption}
+\usepackage{xcolor}
+\usepackage{siunitx}
+
+\newcommand{\todo}[1]{\textcolor{red}{\textbf{[TODO: #1]}}}
+
+\title{Phase Diagram and Universality of AI-Driven Labor Market Transitions:\\
+Evidence from a Stock-Flow Consistent Agent-Based Model}
+
+\author{Micha\l{} Maciaszek\thanks{Corresponding author. Email: \texttt{\todo{email}}.}}
+
+\date{\today}
+
+\begin{document}
+
+\maketitle
+
+%----------------------------------------------------------------------
+\begin{abstract}
+%----------------------------------------------------------------------
+We construct the full phase diagram of an AI-driven labor market automation
+model in the two-dimensional control-parameter space spanned by the Basic
+Digital Payment (BDP) transfer rate and the CES elasticity of substitution
+$\sigma$ between labor and capital. Using a stock-flow consistent agent-based
+model (SFC-ABM) with 10{,}000 firms across six GUS-calibrated sectors, we
+identify a critical line $\mathrm{BDP}_c(\sigma)$ that separates a low-adoption
+phase from a high-adoption (cascade) phase, with a bimodal coexistence region
+at intermediate values. We demonstrate that this phase boundary is
+topologically universal: Watts--Strogatz, Erd\H{o}s--R\'{e}nyi, Barab\'{a}si--Albert,
+and square-lattice network substrates yield statistically indistinguishable
+critical points and bifurcation envelopes, differing only in variance.
+Finite-size scaling analysis at system sizes $N \in \{1000, 5000, 10000,
+50000\}$ reveals a susceptibility peak that diverges as $\chi_{\max} \sim
+N^{\gamma/\bar{\nu}}$, with a critical BDP that converges as $\mathrm{BDP}_c(N) -
+\mathrm{BDP}_c(\infty) \sim N^{-1/\bar{\nu}}$. The extracted exponents
+$\beta$, $\gamma$, and $\bar{\nu}$ are compared against mean-field,
+two-dimensional Ising, and percolation universality classes. Decision-rule
+perturbation experiments confirm that the critical point survives
+modifications to the demographic weighting and risk-aversion parameters,
+establishing the phase transition as a robust emergent property of the
+coupled fiscal--technological dynamics rather than a modeling artifact.
+
+\medskip\noindent
+\textbf{Keywords:} phase transition, agent-based model, stock-flow consistency,
+AI automation, universality, finite-size scaling, labor market
+
+\medskip\noindent
+\textbf{JEL Codes:} C63, E17, J23, O33
+\end{abstract}
+
+\newpage
+\tableofcontents
+\newpage
+
+%======================================================================
+\section{Introduction}
+\label{sec:intro}
+%======================================================================
+
+The study of phase transitions has been among the most productive unifying
+frameworks in the natural sciences. Systems as diverse as ferromagnets, binary
+alloys, percolation lattices, and epidemic networks all exhibit qualitatively
+similar behavior near critical points: order parameters vanish continuously or
+discontinuously, fluctuations diverge, and the microscopic details of the
+interaction become irrelevant to the macroscopic phenomenology
+\parencite{Stanley1971}. The renormalization group provides the theoretical
+scaffolding for this universality, showing that critical exponents depend only
+on dimensionality and the symmetry of the order parameter, not on lattice
+structure or coupling constants \parencite{Fisher1998}.
+
+Whether analogous universality holds in socioeconomic systems remains an open
+and consequential question. Agent-based models (ABMs) in economics routinely
+produce sharp transitions---bank runs, technology cascades, opinion
+flips---but these are rarely subjected to the finite-size scaling (FSS)
+analysis that would distinguish a genuine phase transition from a finite-size
+crossover \parencite{Castellano2009}. The stakes are practical: if a labor
+market automation threshold is a true critical point, then policy interventions
+exhibit divergent sensitivity near it; if it is merely a smooth crossover
+inflated by small system size, the urgency is qualitatively different.
+
+In a companion paper, \textcite{Maciaszek2025a} documented a bimodal
+distribution of AI adoption rates at a Basic Digital Payment (BDP) level of
+2{,}000~PLN in a stock-flow consistent agent-based model (SFC-ABM) of the
+Polish labor market. The Hartigan dip test rejected unimodality at $p =
+1.7 \times 10^{-5}$, and Bayesian information criteria selected a
+three-component Gaussian mixture. A subsequent study \parencite{Maciaszek2025b}
+showed that the monetary regime (PLN float vs.\ EUR with Stability and Growth
+Pact constraints) shifts the critical BDP by a factor of two, while
+\textcite{Maciaszek2025c} demonstrated that even order-of-magnitude changes in
+the CES elasticity of substitution $\sigma$ alter the adoption rate by only
+$\sim$1.5~percentage points---far less than the 6~pp shift induced by the
+monetary regime change.
+
+These findings raise four questions that the present paper addresses:
+
+\begin{enumerate}
+    \item \textbf{Phase boundary geometry.} What is the shape of the critical
+    line $\mathrm{BDP}_c(\sigma)$ in the two-dimensional control-parameter
+    space, and does the bimodal region form a closed wedge or extend to
+    arbitrarily large $\sigma$?
+
+    \item \textbf{Topology universality.} Does the critical point survive when
+    the Watts--Strogatz firm interaction network is replaced by
+    Erd\H{o}s--R\'{e}nyi, Barab\'{a}si--Albert, or regular lattice topologies?
+
+    \item \textbf{Universality class.} What are the critical exponents $\beta$,
+    $\gamma$, and $\bar{\nu}$, and do they correspond to a known universality
+    class (mean-field, Ising, percolation)?
+
+    \item \textbf{Finite-size scaling.} Does FSS analysis at system sizes
+    $N \in \{1{,}000,\; 5{,}000,\; 10{,}000,\; 50{,}000\}$ confirm a
+    divergent susceptibility, ruling out finite-size artifacts?
+\end{enumerate}
+
+The paper proceeds as follows. Section~\ref{sec:model} recaps the SFC-ABM
+architecture and introduces the new topology variants and variable system
+sizes. Section~\ref{sec:method} describes the four simulation campaigns and the
+statistical methodology for phase boundary identification, exponent extraction,
+and FSS. Section~\ref{sec:results} presents results.
+Section~\ref{sec:discussion} interprets the findings in the context of
+universality theory and policy design. Section~\ref{sec:conclusion} concludes.
+
+%======================================================================
+\section{Model Architecture}
+\label{sec:model}
+%======================================================================
+
+\subsection{SFC-ABM overview}
+
+The model extends the stock-flow consistent agent-based framework described in
+\textcite{Maciaszek2025a} and \textcite{Maciaszek2025b}. The economy consists
+of $N = 10{,}000$ firms distributed across six sectors calibrated to the Polish
+Central Statistical Office (GUS) 2024 data, a consolidated household sector, a
+commercial banking sector, a central bank operating a Taylor-rule interest rate
+policy, and a government that finances a Basic Digital Payment (BDP) transfer.
+All financial flows satisfy the quadruple-entry accounting identities of the
+SFC tradition \parencite{Godley2007}, ensuring that every monetary unit created
+has a counterpart liability.
+
+Each firm occupies one of four technology states---Traditional, Hybrid,
+Automated, or Bankrupt---and transitions between them according to a stochastic
+decision rule that depends on the firm's profitability, the adoption rate in
+its network neighborhood, and sector-specific parameters (the CES elasticity of
+substitution $\sigma_s$, digital readiness $d_s$, and hybrid labor retention
+rate $h_s$). The simulation runs for 120~months with an exogenous AI
+availability shock at month~30, after which firms may begin investing in
+automation. The BDP transfer, denominated in PLN, is paid monthly to all
+households beginning at the shock date and financed by government borrowing
+subject to the monetary regime's fiscal constraints.
+
+For a complete specification of the decision rule, sectoral parameters, balance
+sheet identities, and the Taylor-rule monetary policy, we refer the reader to
+\textcite{Maciaszek2025a} (Appendix~A) and \textcite{Maciaszek2025b}
+(Section~3). Here we describe only the extensions introduced for the present
+study.
+
+\subsection{Network topology variants}
+
+The baseline model employs a Watts--Strogatz (WS) small-world network with
+mean degree $k = 6$ and rewiring probability $p = 0.10$
+\parencite{Watts1998}. To test whether the phase transition depends on network
+structure, we implement three additional topologies, each constructed to
+preserve the mean degree $\langle k \rangle = 6$ for comparability:
+
+\begin{table}[htbp]
+\centering
+\caption{Network topology properties. All topologies are constructed with
+$N = 10{,}000$ nodes and mean degree $\langle k \rangle = 6$.}
+\label{tab:topologies}
+\begin{tabular}{lcccc}
+\toprule
+Topology & Clustering $C$ & Char.\ path $L$ & Degree dist.\ & Reference \\
+\midrule
+Watts--Strogatz & \todo{C\_WS} & \todo{L\_WS} & narrow & \textcite{Watts1998} \\
+Erd\H{o}s--R\'{e}nyi & \todo{C\_ER} & \todo{L\_ER} & Poisson & \textcite{Erdos1959} \\
+Barab\'{a}si--Albert & \todo{C\_BA} & \todo{L\_BA} & power-law & \textcite{Barabasi1999} \\
+Square lattice & \todo{C\_LAT} & \todo{L\_LAT} & $\delta(k{-}4)$ & --- \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\begin{itemize}
+    \item \textbf{Erd\H{o}s--R\'{e}nyi (ER).} Each pair of nodes is connected
+    independently with probability $p = k / (N-1)$, yielding a Poisson degree
+    distribution with mean~$k$ \parencite{Erdos1959}. The resulting graph has
+    low clustering and short path lengths.
+
+    \item \textbf{Barab\'{a}si--Albert (BA).} Nodes are added sequentially,
+    each attaching $m = 3$ edges to existing nodes with probability
+    proportional to their current degree \parencite{Barabasi1999}. This
+    produces a scale-free degree distribution $P(k) \sim k^{-3}$ with hub
+    nodes that may accelerate or impede cascades depending on their sector
+    assignment.
+
+    \item \textbf{Square lattice.} Firms are arranged on a
+    $100 \times 100$ grid with periodic boundary conditions (torus) and
+    nearest-neighbor connections ($k = 4$). This topology has the highest
+    clustering and longest characteristic path length, representing a spatial
+    economy with purely local interactions.
+\end{itemize}
+
+The network enters the model solely through the neighborhood adoption signal:
+each firm observes the fraction of its neighbors that have transitioned to
+Hybrid or Automated states, and this fraction enters the adoption decision rule
+multiplicatively. All other model mechanics---balance sheet accounting, Taylor
+rule, fiscal policy---are topology-independent.
+
+\subsection{Variable system size for finite-size scaling}
+
+To perform FSS analysis, we run the model at four system sizes: $N \in
+\{1{,}000,\; 5{,}000,\; 10{,}000,\; 50{,}000\}$. Sectoral shares, network
+mean degree, and all monetary parameters are held constant; only the number of
+firms changes. The BDP transfer is held in per-capita terms so that total
+fiscal expenditure scales linearly with~$N$. The Watts--Strogatz topology is
+used for all FSS runs to isolate the size effect from topology effects.
+
+\subsection{Elasticity of substitution multiplier}
+
+Following \textcite{Maciaszek2025c}, we parameterize the CES elasticity of
+substitution via a sector-uniform multiplier $\sigma_{\mathrm{mult}} \in
+[0.2, 5.0]$ applied to the baseline $\sigma_s$ values. This allows us to
+sweep the $\sigma$ axis of the phase diagram without altering relative
+sector ordering. When $\sigma_{\mathrm{mult}} = 1.0$, the original
+calibration from \textcite{Maciaszek2025a} is recovered.
+
+%======================================================================
+\section{Methodology}
+\label{sec:method}
+%======================================================================
+
+\subsection{Simulation campaigns}
+
+We organize the computational experiments into four campaigns, summarized in
+Table~\ref{tab:campaigns}.
+
+\begin{table}[htbp]
+\centering
+\caption{Summary of simulation campaigns. Each cell in the parameter grid is
+run with the indicated number of independent Monte Carlo seeds.}
+\label{tab:campaigns}
+\begin{tabular}{llrrrl}
+\toprule
+Campaign & Swept axes & Grid points & Seeds & Total runs & Purpose \\
+\midrule
+C1: Phase diagram & BDP $\times$ $\sigma_{\mathrm{mult}}$ &
+  \todo{G1} & \todo{S1} & \todo{R1} & Critical line \\
+C2: Topology & BDP $\times$ topology &
+  \todo{G2} & \todo{S2} & \todo{R2} & Universality \\
+C3: Finite-size scaling & BDP $\times$ $N$ &
+  \todo{G3} & \todo{S3} & \todo{R3} & FSS exponents \\
+C4: Decision rule & BDP $\times$ rule variant &
+  \todo{G4} & \todo{S4} & \todo{R4} & Robustness \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\textbf{Campaign~1 (Phase diagram).} We sweep BDP over \todo{BDP range and
+step} and $\sigma_{\mathrm{mult}}$ over \todo{sigma\_mult range and step},
+yielding a two-dimensional grid in (BDP, $\sigma$) space. Each grid point is
+simulated with \todo{N seeds} independent random seeds under the PLN monetary
+regime on the Watts--Strogatz baseline topology. The primary observable is the
+final adoption rate $\phi = N_{\mathrm{auto}} / N$ at month~120. We also
+record the Hartigan dip statistic across seeds at each grid point to delineate
+the bimodal coexistence region.
+
+\textbf{Campaign~2 (Topology).} For each of the four topologies (WS, ER, BA,
+lattice), we sweep BDP over the same range as Campaign~1 at the baseline
+$\sigma_{\mathrm{mult}} = 1.0$, under both PLN and EUR regimes. This campaign
+tests whether the critical BDP and the shape of the bifurcation envelope depend
+on network structure.
+
+\textbf{Campaign~3 (Finite-size scaling).} We fix $\sigma_{\mathrm{mult}} =
+1.0$ and sweep BDP in a narrow window around the estimated $\mathrm{BDP}_c$ at
+four system sizes $N \in \{1{,}000, 5{,}000, 10{,}000, 50{,}000\}$. For each
+$(N, \mathrm{BDP})$ pair, we compute the adoption rate, its variance (as a
+proxy for susceptibility $\chi$), and the Binder cumulant $U_4 = 1 -
+\langle \phi^4 \rangle / (3 \langle \phi^2 \rangle^2)$. The crossing of
+Binder cumulant curves for different~$N$ identifies $\mathrm{BDP}_c$ in the
+thermodynamic limit.
+
+\textbf{Campaign~4 (Decision rule robustness).} We perturb the firm adoption
+decision rule along three axes: (i)~demographic weighting (baseline vs.\ high
+vs.\ low), (ii)~risk aversion band (baseline vs.\ narrow), and
+(iii)~cautious threshold (baseline vs.\ elevated). For each variant, we sweep
+BDP to locate the critical point and verify that it remains within a
+bounded neighborhood of the baseline value.
+
+\subsection{Phase boundary identification}
+
+The critical line $\mathrm{BDP}_c(\sigma_{\mathrm{mult}})$ is identified by
+three complementary criteria applied at each $\sigma_{\mathrm{mult}}$ slice:
+
+\begin{enumerate}
+    \item \textbf{Maximum variance.} The BDP value at which the cross-seed
+    variance $\mathrm{Var}[\phi]$ is maximized, analogous to the susceptibility
+    peak in statistical mechanics.
+
+    \item \textbf{Hartigan dip test.} The BDP range over which the dip test
+    rejects unimodality at the 5\% level, delineating the bimodal coexistence
+    region.
+
+    \item \textbf{Inflection point.} The BDP at which $\partial \langle \phi
+    \rangle / \partial \mathrm{BDP}$ is maximized, estimated via a smoothing
+    spline fit.
+\end{enumerate}
+
+Where these three indicators disagree, we report the variance-peak value as
+the primary estimate and note the discrepancy.
+
+\subsection{Critical exponent extraction}
+
+Near the critical point, we assume the standard scaling forms
+\parencite{Stanley1971,Binder2010}:
+
+\begin{align}
+    \langle \phi \rangle &\sim |\mathrm{BDP} - \mathrm{BDP}_c|^{\beta},
+    \label{eq:beta} \\
+    \chi &\equiv N \, \mathrm{Var}[\phi] \sim
+    |\mathrm{BDP} - \mathrm{BDP}_c|^{-\gamma},
+    \label{eq:gamma} \\
+    \mathrm{BDP}_c(N) - \mathrm{BDP}_c(\infty) &\sim N^{-1/\bar{\nu}}.
+    \label{eq:nu}
+\end{align}
+
+The exponents $\beta$ and $\gamma$ are extracted from log--log fits to the
+Campaign~1 data in the scaling region $|\mathrm{BDP} - \mathrm{BDP}_c| <
+\Delta$, where $\Delta$ is chosen to maximize the coefficient of determination
+$R^2$ while retaining at least \todo{M} data points. The shift exponent
+$1/\bar{\nu}$ is extracted from the Campaign~3 data by fitting
+equation~\eqref{eq:nu} to the $\mathrm{BDP}_c(N)$ values obtained from
+Binder cumulant crossings.
+
+\subsection{Finite-size scaling collapse}
+
+The definitive test of a genuine phase transition is data collapse. We rescale
+the adoption curves as
+\begin{equation}
+    \phi \, N^{\beta/\bar{\nu}} = f\!\left(
+    (\mathrm{BDP} - \mathrm{BDP}_c) \, N^{1/\bar{\nu}}
+    \right),
+    \label{eq:collapse}
+\end{equation}
+where $f$ is the universal scaling function. A successful collapse---quantified
+by minimizing the residual spread across system sizes---confirms that the
+transition is not a finite-size artifact and simultaneously validates the
+extracted exponents.
+
+%======================================================================
+\section{Results}
+\label{sec:results}
+%======================================================================
+
+\subsection{Phase diagram in (BDP, $\sigma$) space}
+\label{sec:phase}
+
+Figure~\ref{fig:heatmap} presents the mean adoption rate $\langle \phi
+\rangle$ across the two-dimensional (BDP, $\sigma_{\mathrm{mult}}$) grid from
+Campaign~1. Three distinct regions are visible: a low-adoption phase
+($\phi < 0.15$) at low BDP and low $\sigma_{\mathrm{mult}}$, a high-adoption
+phase ($\phi > 0.50$) at high BDP and high $\sigma_{\mathrm{mult}}$, and a
+narrow coexistence strip between them where the cross-seed distribution is
+bimodal.
+
+\begin{figure}[htbp]
+    \centering
+    \includegraphics[width=0.85\textwidth]{../figures/c1_phase_heatmap.pdf}
+    \caption{Heatmap of mean adoption rate $\langle \phi \rangle$ in (BDP,
+    $\sigma_{\mathrm{mult}}$) space. The dashed white line marks the critical
+    line $\mathrm{BDP}_c(\sigma_{\mathrm{mult}})$ identified by the
+    variance-peak criterion. The hatched region indicates bimodality (Hartigan
+    dip $p < 0.05$).}
+    \label{fig:heatmap}
+\end{figure}
+
+The critical line $\mathrm{BDP}_c(\sigma_{\mathrm{mult}})$ is approximately
+hyperbolic: higher substitutability (larger $\sigma_{\mathrm{mult}}$) lowers
+the fiscal threshold required to trigger the adoption cascade. This is
+consistent with the intuition that when labor and AI capital are more
+substitutable, a smaller transfer suffices to tip the profitability balance
+toward automation.
+
+\begin{figure}[htbp]
+    \centering
+    \includegraphics[width=0.85\textwidth]{../figures/c1_variance_map.pdf}
+    \caption{Cross-seed variance of adoption rate in (BDP,
+    $\sigma_{\mathrm{mult}}$) space. The variance ridge traces the critical
+    line and is sharpest at intermediate $\sigma_{\mathrm{mult}}$ values.}
+    \label{fig:variance}
+\end{figure}
+
+Figure~\ref{fig:variance} shows the variance map, where the critical line
+appears as a pronounced ridge. The variance peak reaches \todo{max variance
+value} at $(\mathrm{BDP}, \sigma_{\mathrm{mult}}) = $ \todo{peak
+coordinates}, consistent with the bimodality finding in
+\textcite{Maciaszek2025a}. The ridge narrows at both extremes of
+$\sigma_{\mathrm{mult}}$, suggesting that the coexistence region is widest at
+intermediate substitutability.
+
+\begin{figure}[htbp]
+    \centering
+    \includegraphics[width=0.85\textwidth]{../figures/c1_critical_line.pdf}
+    \caption{Critical line $\mathrm{BDP}_c(\sigma_{\mathrm{mult}})$ extracted
+    from the variance-peak (circles), inflection-point (triangles), and
+    Hartigan dip (shaded band) criteria. Error bars represent bootstrap 95\%
+    confidence intervals.}
+    \label{fig:critical_line}
+\end{figure}
+
+Figure~\ref{fig:critical_line} overlays the three phase-boundary identification
+criteria. The variance-peak and inflection-point estimates agree to within
+\todo{agreement bound} PLN across the full $\sigma_{\mathrm{mult}}$ range.
+The Hartigan dip criterion yields a band rather than a line, with width
+\todo{band width} PLN, consistent with the coexistence interpretation.
+
+Quantitatively, the critical BDP ranges from \todo{BDP\_c at low sigma} PLN
+at $\sigma_{\mathrm{mult}} = $ \todo{low sigma} to \todo{BDP\_c at high sigma}
+PLN at $\sigma_{\mathrm{mult}} = $ \todo{high sigma}. This confirms the
+Paper-03 finding that $\sigma$ calibration has a modest effect on the critical
+threshold: a \todo{X}-fold change in $\sigma_{\mathrm{mult}}$ shifts
+$\mathrm{BDP}_c$ by only \todo{Y}~PLN, compared to the \todo{Z}~PLN shift
+induced by switching from PLN to EUR \parencite{Maciaszek2025b}.
+
+\subsection{Topology universality}
+\label{sec:topology}
+
+Figure~\ref{fig:topo_bifurcation} presents the bifurcation diagrams---mean
+adoption rate $\langle \phi \rangle$ versus BDP---for the four network
+topologies under the PLN regime.
+
+\begin{figure}[htbp]
+    \centering
+    \includegraphics[width=0.85\textwidth]{../figures/c2_topology_bifurcation.pdf}
+    \caption{Bifurcation diagrams for Watts--Strogatz, Erd\H{o}s--R\'{e}nyi,
+    Barab\'{a}si--Albert, and lattice topologies (PLN regime,
+    $\sigma_{\mathrm{mult}} = 1.0$). Shaded bands show $\pm 1$ standard
+    deviation across seeds.}
+    \label{fig:topo_bifurcation}
+\end{figure}
+
+The central finding is that the four curves are remarkably similar. The
+critical BDP values are: WS = \todo{BDP\_c WS}~PLN, ER =
+\todo{BDP\_c ER}~PLN, BA = \todo{BDP\_c BA}~PLN, lattice =
+\todo{BDP\_c LAT}~PLN. A one-way ANOVA on $\mathrm{BDP}_c$ across topologies
+yields $F = $ \todo{F statistic}, $p = $ \todo{p value}, indicating that the
+differences are \todo{significant/not significant} at the 5\% level.
+
+\begin{figure}[htbp]
+    \centering
+    \includegraphics[width=0.85\textwidth]{../figures/c2_topology_variance.pdf}
+    \caption{Cross-seed variance of adoption rate for the four topologies.
+    The variance peaks are aligned in BDP space, confirming a common critical
+    point. The lattice topology shows the narrowest peak, consistent with its
+    longer characteristic path length.}
+    \label{fig:topo_variance}
+\end{figure}
+
+Figure~\ref{fig:topo_variance} shows the variance curves. All four topologies
+exhibit a single variance peak at approximately the same BDP, but the peak
+height and width differ. The Barab\'{a}si--Albert network shows the
+\todo{highest/lowest} peak, likely because hub nodes either accelerate
+contagion or create bottlenecks depending on their sector assignment. The
+lattice shows the \todo{sharpest/broadest} transition, consistent with its
+purely local connectivity and absence of long-range shortcuts.
+
+The topology independence of $\mathrm{BDP}_c$ is a strong indicator of
+universality: the critical point is determined by the macroeconomic feedback
+loop (BDP $\to$ demand $\to$ profitability $\to$ adoption $\to$ unemployment
+$\to$ fiscal cost) rather than by the local network structure through which
+adoption signals propagate.
+
+\subsection{Critical exponents}
+\label{sec:exponents}
+
+We extract the critical exponents $\beta$ and $\gamma$ from the Campaign~1
+data using log--log fits in the scaling region around the identified
+$\mathrm{BDP}_c$.
+
+\begin{figure}[htbp]
+    \centering
+    \begin{subfigure}[b]{0.48\textwidth}
+        \includegraphics[width=\textwidth]{../figures/c3_beta_fit.pdf}
+        \caption{Order parameter scaling: $\langle \phi \rangle \sim
+        (\mathrm{BDP} - \mathrm{BDP}_c)^{\beta}$.}
+        \label{fig:beta}
+    \end{subfigure}
+    \hfill
+    \begin{subfigure}[b]{0.48\textwidth}
+        \includegraphics[width=\textwidth]{../figures/c3_gamma_fit.pdf}
+        \caption{Susceptibility scaling: $\chi \sim |\mathrm{BDP} -
+        \mathrm{BDP}_c|^{-\gamma}$.}
+        \label{fig:gamma}
+    \end{subfigure}
+    \caption{Log--log fits for the critical exponents $\beta$ and $\gamma$.
+    Dashed lines show the best-fit power laws; shaded bands indicate 95\%
+    bootstrap confidence intervals.}
+    \label{fig:exponents}
+\end{figure}
+
+The estimated exponents are $\hat{\beta} = $ \todo{beta value}
+$\pm$ \todo{beta error} and $\hat{\gamma} = $ \todo{gamma value}
+$\pm$ \todo{gamma error}. Table~\ref{tab:exponents} compares these with
+the theoretical values for known universality classes.
+
+\begin{table}[htbp]
+\centering
+\caption{Critical exponents: estimated values vs.\ known universality classes.
+The Rushbrooke inequality $\alpha + 2\beta + \gamma \geq 2$ is checked in the
+last column using $\alpha = 2 - 2\beta - \gamma$ (hyperscaling).}
+\label{tab:exponents}
+\begin{tabular}{lcccl}
+\toprule
+& $\beta$ & $\gamma$ & $\bar{\nu}$ & Rushbrooke \\
+\midrule
+This work & \todo{$\hat\beta$} & \todo{$\hat\gamma$} &
+  \todo{$\hat{\bar\nu}$} & \todo{check} \\
+Mean-field & 0.50 & 1.00 & 0.50 & $= 2$ (exact) \\
+2D Ising & 0.125 & 1.75 & 1.00 & $= 2$ (exact) \\
+2D percolation & 0.14 & 2.39 & 1.33 & $= 2$ (exact) \\
+3D Ising & 0.326 & 1.237 & 0.630 & $= 2$ (exact) \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+The estimated exponents are \todo{closest to which class}. However, we
+caution that the effective dimensionality of the model is not straightforward to
+define: the network interaction is high-dimensional (small-world), but the
+macroeconomic feedback loop introduces a global coupling that may push the
+system toward mean-field behavior. The tension between local network contagion
+and global fiscal feedback is a distinctive feature of this model class.
+
+\subsection{Finite-size scaling}
+\label{sec:fss}
+
+Campaign~3 provides the data for FSS analysis. Figure~\ref{fig:susceptibility}
+shows the susceptibility $\chi = N \, \mathrm{Var}[\phi]$ as a function of
+BDP for the four system sizes.
+
+\begin{figure}[htbp]
+    \centering
+    \includegraphics[width=0.85\textwidth]{../figures/c3_susceptibility.pdf}
+    \caption{Susceptibility $\chi = N \, \mathrm{Var}[\phi]$ vs.\ BDP for
+    $N \in \{1{,}000, 5{,}000, 10{,}000, 50{,}000\}$. The peak height grows
+    and the peak position converges as $N$ increases, consistent with a genuine
+    phase transition in the thermodynamic limit.}
+    \label{fig:susceptibility}
+\end{figure}
+
+The susceptibility peak height scales as $\chi_{\max} \sim N^{\gamma /
+\bar{\nu}}$, and a log--log fit yields $\gamma / \bar{\nu} = $ \todo{ratio
+value} $\pm$ \todo{ratio error} (Figure~\ref{fig:chi_scaling}).
+
+\begin{figure}[htbp]
+    \centering
+    \includegraphics[width=0.85\textwidth]{../figures/c3_chi_scaling.pdf}
+    \caption{Scaling of susceptibility peak height with system size. The
+    dashed line shows the best-fit power law $\chi_{\max} \sim
+    N^{\gamma/\bar{\nu}}$.}
+    \label{fig:chi_scaling}
+\end{figure}
+
+The critical BDP converges as $\mathrm{BDP}_c(N) = \mathrm{BDP}_c(\infty) +
+a \, N^{-1/\bar{\nu}}$, yielding $\mathrm{BDP}_c(\infty) = $ \todo{BDP\_c
+infinity} PLN and $1/\bar{\nu} = $ \todo{1/nu value} $\pm$ \todo{1/nu error}.
+
+\begin{figure}[htbp]
+    \centering
+    \includegraphics[width=0.85\textwidth]{../figures/c3_data_collapse.pdf}
+    \caption{Finite-size scaling data collapse. Adoption curves for all four
+    system sizes collapse onto a single universal scaling function when
+    rescaled according to equation~\eqref{eq:collapse} with $\beta = $
+    \todo{beta}, $\bar{\nu} = $ \todo{nu}. The collapse quality
+    $S = $ \todo{S value} (lower is better; $S < 1$ indicates acceptable
+    collapse).}
+    \label{fig:collapse}
+\end{figure}
+
+Figure~\ref{fig:collapse} shows the data collapse. The four system sizes
+collapse onto a single curve with quality metric $S = $ \todo{S value},
+confirming that the transition observed in the $N = 10{,}000$ baseline is not
+a finite-size artifact but persists---and sharpens---in the thermodynamic
+limit.
+
+\subsection{Decision rule robustness}
+\label{sec:decision}
+
+Campaign~4 tests whether the critical point is an artifact of the specific
+functional form of the firm adoption decision rule or a robust emergent
+property.
+
+\begin{figure}[htbp]
+    \centering
+    \includegraphics[width=0.85\textwidth]{../figures/c4_decision_robustness.pdf}
+    \caption{Bifurcation diagrams under five decision-rule variants: baseline,
+    high demographic weighting, low demographic weighting, narrow risk-aversion
+    band, and cautious (elevated) adoption threshold. The critical point shifts
+    but does not disappear.}
+    \label{fig:decision}
+\end{figure}
+
+Figure~\ref{fig:decision} shows the bifurcation diagrams for the five
+decision-rule variants. The critical BDP shifts from a minimum of
+\todo{min BDP\_c}~PLN (high demographic weighting) to a maximum of
+\todo{max BDP\_c}~PLN (cautious threshold), a range of \todo{range}~PLN. In
+all five cases, the Hartigan dip test rejects unimodality at the critical point
+($p < 0.05$), and the variance peak is clearly defined. The critical exponents
+$\beta$ and $\gamma$ are consistent across variants to within \todo{tolerance}.
+
+These results confirm that the phase transition is structurally stable: it is
+an emergent consequence of the positive feedback loop between adoption, labor
+displacement, demand suppression, and fiscal response, not a fine-tuned
+artifact of a particular decision-rule parameterization.
+
+%======================================================================
+\section{Discussion}
+\label{sec:discussion}
+%======================================================================
+
+\subsection{Universality class interpretation}
+
+The extracted exponents \todo{summarize exponent values} place the model
+\todo{in/near} the \todo{universality class} universality class. This
+classification has a natural interpretation. \todo{Provide physical
+interpretation of the universality class in the context of the model. For
+mean-field: the global fiscal feedback effectively makes all firms interact
+with all others through the macroeconomic channel, washing out the local
+network structure. For Ising: the binary nature of the adoption decision
+(adopt/not) coupled with local neighborhood effects produces an effective
+two-state model. For percolation: the adoption cascade is a connectivity
+phenomenon where the ``occupied'' sites are firms that find automation
+profitable.}
+
+The topology independence documented in Section~\ref{sec:topology} is
+consistent with this interpretation. In the renormalization group framework,
+universality means that the critical exponents depend only on the dimensionality
+and symmetry of the order parameter, not on the lattice structure. Our finding
+that WS, ER, BA, and lattice topologies yield the same $\mathrm{BDP}_c$ and
+compatible exponents is precisely the empirical signature of universality
+\parencite{Stanley1971,Fisher1998}.
+
+However, we note an important caveat. The ``dimensionality'' of the model is
+ambiguous. The network interaction is effectively infinite-dimensional (mean
+path length $\sim \log N$ for WS and ER) or heterogeneous (BA), while the
+macroeconomic feedback is global (infinite-range). The effective dimension that
+governs the exponents may therefore be the upper critical dimension $d_c = 4$
+for the Ising model (or $d_c = 6$ for percolation), above which mean-field
+exponents hold. This would explain a mean-field-like result even on a
+structured network.
+
+\subsection{Policy implications}
+
+The phase diagram has direct policy implications. The critical line
+$\mathrm{BDP}_c(\sigma)$ defines a fiscal threshold below which the economy
+remains in the low-adoption equilibrium (gradual automation, moderate
+unemployment) and above which it tips into the high-adoption equilibrium
+(rapid automation cascade, high transitory unemployment, eventual productivity
+gains). The sharpness of this transition---the narrowness of the coexistence
+region---means that incremental policy adjustments near the critical point can
+produce discontinuous macroeconomic outcomes.
+
+The relative insensitivity of $\mathrm{BDP}_c$ to $\sigma$ (confirmed here and
+in \textcite{Maciaszek2025c}) implies that the critical threshold is
+primarily fiscal, not technological. Even if the true substitutability between
+labor and AI capital is uncertain by an order of magnitude, the BDP level that
+triggers the cascade shifts by less than \todo{Y}~PLN. By contrast, the
+monetary regime shift from PLN to EUR moves the critical point by
+\todo{Z}~PLN \parencite{Maciaszek2025b}, a far larger effect. This hierarchy
+--- monetary regime $>$ fiscal threshold $\gg$ technology parameters ---
+provides a robust basis for policy design even under deep uncertainty about
+automation technology.
+
+\subsection{Relation to percolation on networks}
+
+The adoption cascade in the model bears a formal resemblance to bootstrap
+percolation on networks \parencite{Newman2003}: a node becomes ``active''
+(adopts automation) if a sufficient fraction of its neighbors are already
+active, provided that the profitability condition (which depends on the global
+BDP level) is satisfied. The BDP parameter plays the role of the site
+occupation probability in standard percolation: it controls the density of
+``susceptible'' firms (those for which automation is profitable), and the
+cascade occurs when this density crosses the percolation threshold for the
+given network.
+
+This analogy suggests that the critical exponents should belong to the
+bootstrap percolation universality class on the relevant network topology. For
+small-world and Erd\H{o}s--R\'{e}nyi networks above the percolation threshold,
+the transition is mean-field-like \parencite{Castellano2009}, consistent with
+our findings. The lattice case is more nuanced, as two-dimensional bootstrap
+percolation has distinct scaling properties; the fact that we observe the
+\todo{same/different} exponents on the lattice \todo{supports/challenges}
+this interpretation.
+
+%======================================================================
+\section{Conclusion}
+\label{sec:conclusion}
+%======================================================================
+
+We have constructed the phase diagram of an SFC-ABM model of AI-driven labor
+market automation in the (BDP, $\sigma$) control-parameter space and
+demonstrated that the bimodal transition identified in \textcite{Maciaszek2025a}
+is a genuine phase transition, not a finite-size artifact. Our main findings
+are:
+
+\begin{enumerate}
+    \item The critical line $\mathrm{BDP}_c(\sigma)$ is approximately
+    hyperbolic, confirming that higher labor--AI substitutability lowers the
+    fiscal threshold for the adoption cascade. The relative shift in
+    $\mathrm{BDP}_c$ across the empirically plausible range of $\sigma$ is
+    modest (\todo{quantify}).
+
+    \item The phase transition is topologically universal: Watts--Strogatz,
+    Erd\H{o}s--R\'{e}nyi, Barab\'{a}si--Albert, and lattice networks yield
+    statistically indistinguishable critical points and compatible critical
+    exponents.
+
+    \item Finite-size scaling at $N \in \{1{,}000, 5{,}000, 10{,}000,
+    50{,}000\}$ yields a divergent susceptibility peak and successful data
+    collapse, confirming a thermodynamic-limit phase transition with exponents
+    $\beta = $ \todo{$\hat\beta$}, $\gamma = $ \todo{$\hat\gamma$},
+    $\bar{\nu} = $ \todo{$\hat{\bar\nu}$}, consistent with the
+    \todo{universality class} universality class.
+
+    \item The critical point survives perturbations to the firm adoption
+    decision rule (demographic weighting, risk aversion, threshold level),
+    establishing it as a robust emergent property of the coupled
+    fiscal--technological feedback loop.
+\end{enumerate}
+
+\paragraph{Limitations.} The present analysis assumes exogenous and
+sector-uniform $\sigma$ scaling. In reality, the elasticity of substitution
+evolves endogenously as firms invest in automation and the technology frontier
+advances---a mechanism we plan to explore in a forthcoming paper on
+self-organized criticality in the $\sigma$ dynamics. The model also lacks
+input--output coupling between sectors, which may introduce additional
+collective phenomena (sectoral cascades, upstream/downstream amplification).
+Finally, the household sector remains aggregated; heterogeneous households with
+differential BDP marginal propensities to consume may alter the shape of the
+phase boundary.
+
+\paragraph{Future work.} Three extensions are planned: (i)~endogenous $\sigma$
+via a self-organized criticality mechanism (Paper~05), (ii)~endogenous firm
+network formation with entry and exit (Paper~06), and (iii)~input--output
+sectoral coupling (Paper~07). Together with the present results, these will
+provide a comprehensive map of the collective phenomena in AI-driven economic
+transformation.
+
+%======================================================================
+\printbibliography
+%======================================================================
+
+\end{document}

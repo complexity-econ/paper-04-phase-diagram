@@ -1,3 +1,14 @@
 __pycache__/
 *.pyc
 .DS_Store
+
+# LaTeX build artifacts
+latex/*.aux
+latex/*.bbl
+latex/*.bcf
+latex/*.blg
+latex/*.log
+latex/*.out
+latex/*.run.xml
+latex/*.toc
+latex/*-blx.bib

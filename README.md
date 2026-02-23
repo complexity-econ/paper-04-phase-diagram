@@ -1,4 +1,4 @@
-# Paper-04: Phase Diagram & Universality
+# Phase Diagram & Universality
 
 Phase transition universality analysis for the SFC-ABM model of AI-driven labor market automation.
 

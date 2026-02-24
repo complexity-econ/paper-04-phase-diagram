@@ -85,3 +85,15 @@ make paper
 
 ![decision](figures/fig11_decision_sensitivity.png)
 **Fig 11.** Five decision-rule variants (baseline, high/low demonstration, narrow risk, cautious threshold) produce identical bifurcation curves. BDP_c = 500 for all five — the phase transition is decision-rule invariant.
+
+## License
+
+MIT
+
+## Related
+
+- [Paper-01: The Acceleration Paradox](https://github.com/complexity-econ/paper-01-acceleration-paradox)
+- [Paper-02: Monetary Regimes](https://github.com/complexity-econ/paper-02-monetary-regimes)
+- [Paper-03: Empirical σ Estimation](https://github.com/complexity-econ/paper-03-empirical-sigma)
+- [Paper-05: Endogenous Technology & Networks](https://github.com/complexity-econ/paper-05-endogenous)
+- [Core engine](https://github.com/complexity-econ/core)

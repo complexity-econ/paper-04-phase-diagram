@@ -1,6 +1,7 @@
 # Phase Diagram & Universality
 
 [![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.18751083.svg)](https://doi.org/10.5281/zenodo.18751083)
+
 [**Read the paper (PDF)**](latex/paper_en.pdf)
 
 Phase transition universality analysis for the SFC-ABM model of AI-driven labor market automation.

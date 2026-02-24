@@ -45,6 +45,11 @@ make paper
 
 ## Figures
 
+### Animated Bifurcation (PLN vs EUR)
+
+![animated_bifurcation](figures/animated_bifurcation.gif)
+**Animated sweep.** As BDP increases from 0 to 5,000 PLN, the PLN regime reveals a reentrant peak at BDP_c = 500 while the EUR + SGP regime stays flat — the fiscal constraint kills the transition.
+
 ### Phase Diagram (Campaign 1)
 
 ![phase_diagram](figures/fig01_phase_diagram.png)

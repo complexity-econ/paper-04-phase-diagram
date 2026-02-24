@@ -1,0 +1,21 @@
+{
+  "title": "Phase Diagram and Universality of AI-Driven Labor Market Transitions",
+  "upload_type": "software",
+  "description": "Phase transition universality analysis for the SFC-ABM model of AI-driven labor market automation. 18,540 Monte Carlo simulations across 4 campaigns: phase diagram, topology universality, finite-size scaling, decision-rule robustness.",
+  "creators": [
+    {
+      "name": "Maciaszek, Mateusz",
+      "orcid": null
+    }
+  ],
+  "license": "MIT",
+  "keywords": [
+    "phase transition",
+    "agent-based model",
+    "stock-flow consistency",
+    "AI automation",
+    "universality",
+    "finite-size scaling",
+    "labor market"
+  ]
+}
